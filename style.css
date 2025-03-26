@@ -227,6 +227,7 @@ body {
     width: calc(100% - 40px);
     margin: 10px 20px 20px 20px; /* Adjusted margin*/
     background-color: var(--success-color);
+    color: var(--bg-color);
 }
 .btn-restart:hover:not(:disabled) {
     background-color: #218838;
@@ -270,13 +271,9 @@ body {
     display: flex;
     align-items: center;
     gap: 5px; /* Reduced gap between label and input */
-    /* Removed fixed width for label - let flexbox handle it */
-    /* width: 60px; */
-    /* Removed text-align: right if fixed width is gone */
-    /* text-align: right; */
     flex-basis: calc(33% - 10px); /* Try to fit 3 items, adjust for gap */
     flex-grow: 1; /* Allow items to grow slightly */
-    min-width: 80px; /* Prevent items from becoming too small */
+    min-width: 100px; /* Prevent items from becoming too small */
 }
 .setting-item label {
     font-size: 0.9em;
