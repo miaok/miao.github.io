@@ -105,10 +105,11 @@ body {
 }
 .option {
     display: block; /* Make label take full width */
-    padding: 12px 15px;
+    padding: 8px 12px;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     cursor: pointer;
+    font-size: 18px;
     transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.3s ease;
     display: flex;
     align-items: center;
@@ -252,67 +253,52 @@ body {
 /* --- Styles for Settings Card --- */
 .settings-card {
     order: -1;
-    /* ... other existing styles ... */
 }
 .settings-body {
     padding: 12px 15px; /* Slightly adjusted padding */
     display: flex;
     flex-direction: column; /* Keeps button/note below the items */
-    gap: 5px; /* Increased gap between the item container and button */
+    gap: 2px; /* Increased gap between the item container and button */
 }
-/* *** NEW: Styles for the horizontal container *** */
-.settings-items-container {
+/* 在settings-card相关样式附近添加 */
+.settings-card .settings-row {
     display: flex;
-    flex-wrap: wrap; /* Allow wrapping on smaller widths if needed */
-    justify-content: space-around; /* Distribute items evenly */
-    gap: 5px; /* Add gap between items if they wrap */
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
 }
-.setting-item {
+
+.settings-card .setting-item {
     display: flex;
     align-items: center;
-    gap: 5px; /* Reduced gap between label and input */
-    flex-basis: calc(33% - 10px); /* Try to fit 3 items, adjust for gap */
-    flex-grow: 1; /* Allow items to grow slightly */
-    min-width: 100px; /* Prevent items from becoming too small */
+    gap: 5px;
+    flex: 1;
+    min-width: 0;
 }
-.setting-item label {
+
+.settings-card .setting-item label {
+    white-space: nowrap;
     font-size: 0.9em;
-    color: var(--secondary-color);
-    white-space: nowrap; /* Prevent label text from wrapping */
+    flex-shrink: 0;
 }
-.setting-item input[type="number"] {
-    padding: 6px 8px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    font-size: 0.95em;
-    width: 50px; /* Keep input width relatively small */
-    /* flex-grow: 1; */ /* Alternative: Let input grow */
-    transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-/* ... input focus/disabled styles remain the same ... */
-.regenerate-btn {
-    margin-top: 0; /* Remove top margin, handled by settings-body gap */
-    padding: 8px 15px;
+
+/* 修改settings-card相关样式 */
+.settings-card .setting-item input {
+    width: 20px; /* 缩小宽度 */
+    padding: 4px 6px; /* 调整内边距 */
     font-size: 0.9em;
-    width: 100%; /* Make button full width */
- }
-.settings-note {
-    font-size: 0.8em;
-    color: var(--secondary-color);
-    margin-top: -5px; /* Reduce space above the note */
-    line-height: 1.4;
-    text-align: center; /* Center the note */
+    flex-grow: 1;
+    border: 1px solid #ced4da; /* 更浅的边框颜色 */
+    border-radius: 4px; /* 圆角 */
+    transition: border-color 0.15s ease-in-out;
 }
-.regenerate-btn {
-    margin-top: 5px;
-    padding: 8px 15px;
-    font-size: 0.9em;
- }
-.settings-note {
-    font-size: 0.8em;
-    color: var(--secondary-color);
-    margin-top: 5px;
-    line-height: 1.4;
+
+.settings-card .setting-item input:focus {
+    border-color: #86b7fe; /* 聚焦时更浅的蓝色 */
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1); /* 更柔和的阴影 */
 }
 .timer-display {
     font-size: 1.8em;
@@ -428,6 +414,12 @@ body {
     font-size: 1.3em;
     font-weight: bold;
 }
+.regenerate-btn {
+    width: 50%; 
+    padding: 4px 10px; 
+    margin: 4px auto 0; 
+    display: block;
+}
 #incorrect-questions-list {
     padding: 0 20px 10px 20px; /* Reduced bottom padding */
     font-size: 0.9em;
@@ -486,9 +478,9 @@ body {
          flex: 1 1 300px; /* Allow growth, larger base */
          min-width: 250px;
     }
-    .settings-body { padding: 10px 12px; gap: 8px;}
-    .setting-item label { width: 50px; }
-    .setting-item input[type="number"] { width: 50px; }
+    .settings-body { padding: 10px 12px; gap: 2px;}
+    .setting-item label { width: 30px; }
+    /* .setting-item input[type="number"] { width: 50px; } */
     .answer-grid { /* Make grid a bit smaller */
          grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
          max-height: 180px; /* Adjust height */
@@ -521,31 +513,31 @@ body {
         padding: 10px;
     }
     .info-area {
-         flex-direction: column; /* Stack elements again */
-         align-items: stretch; /* Make children full width */
-         gap: 15px
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
     }
     .btn-submit,
     .settings-card,
     .answer-card,
     .score-card {
-        order: 0; /* Reset order */
+        order: 0;
         flex-basis: auto;
         width: 100%;
         min-width: unset;
         margin-right: 0;
     }
-     .btn-submit {
-       margin-bottom: 0; /* No specific margin needed */
-       font-size: 1em; /* Reset font size */
-       padding: 10px; /* Reset padding */
-     }
-     .settings-body { padding: 15px; } /* Restore padding */
-     .regenerate-btn { width: 100%; } /* Full width button */
-
+    .btn-submit {
+        margin-bottom: 0;
+        font-size: 1em;
+        padding: 10px;
+    }
+    .settings-body {
+        padding: 15px;
+    }
     .timer-card, .answer-card, .score-card {
-         width: 100%;
-         flex-basis: auto;
+        width: 100%;
+        flex-basis: auto;
     }
     .question-text {
         font-size: 1.1em;
@@ -553,12 +545,12 @@ body {
     .option {
         padding: 10px 12px;
         font-size: 0.95em;
-        gap: 8px; /* Reduce gap */
+        gap: 8px;
     }
-     .exam-container.review-mode .option::before {
-         font-size: 0.8em;
-         right: 8px;
-     }
+    .exam-container.review-mode .option::before {
+        font-size: 0.8em;
+        right: 8px;
+    }
     .btn {
         padding: 10px 15px;
         font-size: 0.9em;
@@ -570,7 +562,7 @@ body {
     .answer-grid {
         padding: 10px;
     }
-     .answer-pagination {
+    .answer-pagination {
         justify-content: space-around;
     }
     .pagination-btn {
@@ -578,7 +570,92 @@ body {
         min-width: 25px;
     }
     #incorrect-questions-list {
-        max-height: 120px; /* Adjust height */
+        max-height: 120px;
     }
 }
+/* 自定义弹窗样式 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
 
+.modal.show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+}
+
+.modal-content {
+    background-color: var(--bg-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.close-modal {
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.close-modal:hover {
+    color: var(--danger-color);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* 响应式调整 */
+@media (max-width: 576px) {
+    .modal-content {
+        width: 95%;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+    }
+}

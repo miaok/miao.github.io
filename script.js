@@ -306,17 +306,42 @@ function loadQuestion(index) {
         currentOptions = shuffleArray([...question.options]);
         shuffledOptionsMap.set(index, currentOptions);
     }
-    currentOptions.forEach(optionText => { /* ... render options ... */
-        const label = document.createElement('label'); label.classList.add('option');
+    currentOptions.forEach((optionText, i) => { // 添加索引参数i
+        const label = document.createElement('label'); 
+        label.classList.add('option');
         const inputType = question.type === 'multiple' ? 'checkbox' : 'radio';
         const inputName = `question_${index}`;
-        const input = document.createElement('input'); input.type = inputType; input.name = inputName; input.value = optionText;
+        const input = document.createElement('input'); 
+        input.type = inputType; 
+        input.name = inputName; 
+        input.value = optionText;
         const currentAnswer = userAnswers[index];
-        if (question.type === 'multiple') { if (Array.isArray(currentAnswer) && currentAnswer.includes(optionText)) { input.checked = true; if (!examSubmitted) label.classList.add('selected'); } }
-        else { if (currentAnswer === optionText) { input.checked = true; if (!examSubmitted) label.classList.add('selected'); } }
-        if (!examSubmitted) { input.onchange = (e) => handleOptionSelect(e.target, index); } else { input.disabled = true; }
-        label.appendChild(input); label.appendChild(document.createTextNode(" " + optionText)); optionsContainerEl.appendChild(label);
-     });
+        
+        // 添加字母前缀
+        const optionLetter = String.fromCharCode(65 + i); // A=65, B=66, etc.
+        const displayText = `${optionLetter}. ${optionText}`;
+
+        if (question.type === 'multiple') { 
+            if (Array.isArray(currentAnswer) && currentAnswer.includes(optionText)) { 
+                input.checked = true; 
+                if (!examSubmitted) label.classList.add('selected'); 
+            } 
+        }
+        else { 
+            if (currentAnswer === optionText) { 
+                input.checked = true; 
+                if (!examSubmitted) label.classList.add('selected'); 
+            } 
+        }
+        if (!examSubmitted) { 
+            input.onchange = (e) => handleOptionSelect(e.target, index); 
+        } else { 
+            input.disabled = true; 
+        }
+        label.appendChild(input); 
+        label.appendChild(document.createTextNode(" " + displayText)); // 使用带字母的显示文本
+        optionsContainerEl.appendChild(label);
+    });
 
     // --- Navigation Buttons (Unchanged logic) ---
     prevBtn.disabled = index === 0;
@@ -465,48 +490,74 @@ function displayResults(results) { /*...(logic unchanged)...*/
 
 
 /** Handles the exam submission - MODIFIED */
+// 在文件顶部添加变量
+const submitModal = document.getElementById('submit-modal');
+const submitMessage = document.getElementById('submit-message');
+const confirmSubmitBtn = document.getElementById('confirm-submit');
+const cancelSubmitBtn = document.getElementById('cancel-submit');
+const closeModalBtn = document.querySelector('.close-modal');
+
+// 修改submitExam函数
 function submitExam(isAutoSubmit = false) {
     if (examSubmitted) return;
-
-    // Stop the timer immediately
+    
     if (timerInterval) clearInterval(timerInterval);
-
+    
     if (!isAutoSubmit) {
-        // Confirmation logic (Unchanged)
         const unanswered = userAnswers.filter(a => a === null || (Array.isArray(a) && a.length === 0)).length;
-        let confirmMsg = '确定要交卷吗？';
-        if (unanswered > 0) confirmMsg = `您还有 ${unanswered} 题未作答，确定要交卷吗？`;
-        else if (currentQuestionIndex !== sortedQuestions.length -1) confirmMsg = '您已完成所有题目，确定要交卷吗？';
-        else confirmMsg = '您已完成所有可见题目，确定要交卷吗？';
-        if (!confirm(confirmMsg)) return;
+        let msg = '确定要交卷吗？';
+        if (unanswered > 0) msg = `您还有 ${unanswered} 题未作答，确定要交卷吗？`;
+        else if (currentQuestionIndex !== sortedQuestions.length -1) msg = '您已完成所有题目，确定要交卷吗？';
+        else msg = '您已完成所有可见题目，确定要交卷吗？';
+        
+        submitMessage.textContent = msg;
+        submitModal.classList.add('show');
+        return; // 等待用户确认
     }
+    
+    // 自动交卷或确认后的逻辑
+    processExamSubmission();
+}
 
-    examSubmitted = true; // Set submitted flag
+// 添加弹窗事件处理
+confirmSubmitBtn.addEventListener('click', () => {
+    submitModal.classList.remove('show');
+    processExamSubmission();
+});
+
+cancelSubmitBtn.addEventListener('click', () => {
+    submitModal.classList.remove('show');
+    if (timerInterval) startTimer(); // 恢复计时器
+});
+
+closeModalBtn.addEventListener('click', () => {
+    submitModal.classList.remove('show');
+    if (timerInterval) startTimer(); // 恢复计时器
+});
+
+// 提取交卷处理逻辑到单独函数
+function processExamSubmission() {
+    examSubmitted = true;
     console.log("交卷处理中...");
-
+    
     submitBtn.disabled = true;
-    submitBtn.textContent = '评卷中...'; // Intermediate state
-    examContainerEl.classList.add('submitted', 'review-mode'); // Add classes
-
-    // Use setTimeout for UI update before calculation
+    submitBtn.textContent = '评卷中...';
+    examContainerEl.classList.add('submitted', 'review-mode');
+    
     setTimeout(() => {
         examResults = calculateScore();
         displayResults(examResults);
-        buildAnswerCard(); // Update card with feedback
+        buildAnswerCard();
         if (currentQuestionIndex >= 0 && currentQuestionIndex < sortedQuestions.length) {
-             showFeedbackOnOptions(); // Show feedback on current question
+            showFeedbackOnOptions();
         }
-
-        // Finalize submit button state
-        updateSubmitButtonText(); // Set final text ("考试结束")
+        
+        updateSubmitButtonText();
         submitBtn.classList.remove('btn-primary', 'btn-danger', 'time-up-btn');
-        submitBtn.classList.add('btn-secondary'); // Grey out
-        submitBtn.disabled = true; // Keep disabled
-
-        setSettingsInputsDisabled(true); // Ensure settings stay disabled
-
-        console.log("最终答案:", userAnswers);
-        console.log("得分:", examResults.score, "/", examResults.totalPoints);
+        submitBtn.classList.add('btn-secondary');
+        submitBtn.disabled = true;
+        
+        setSettingsInputsDisabled(true);
     }, 100);
 }
 
