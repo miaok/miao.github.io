@@ -162,7 +162,11 @@ function generateExamQuestions() {
     examStarted = false; // Ensure examStarted is false before first interaction
     examResults = null;
     answerCardCurrentPage = 1;
-    if (timerInterval) clearInterval(timerInterval); // Stop any previous timer
+    questionAnswerChecked = false; // 重置练习模式中的答案检查状态
+    if (timerInterval) {
+        clearInterval(timerInterval); // Stop any previous timer
+        timerInterval = null;
+    }
 
     // --- Calculate Dynamic Time Limit ---
     timeLeft = sortedQuestions.length * BASE_SECONDS_PER_QUESTION;
@@ -384,15 +388,17 @@ function loadQuestion(index) {
     prevBtn.disabled = index === 0;
 
     // 重置下一题按钮状态
-    nextBtn.disabled = isLastQuestion && !isPracticeMode;
+    nextBtn.disabled = isLastQuestion;
     questionAnswerChecked = false; // 重置答案检查状态
 
     // 设置下一题按钮文本
     if (isPracticeMode) {
         if (isLastQuestion) {
-            nextBtn.textContent = '确认答案并完成';
+            nextBtn.textContent = '已是最后一题';
+            nextBtn.disabled = true;
         } else {
             nextBtn.textContent = '确认答案';
+            nextBtn.disabled = false;
         }
         nextBtn.classList.remove('btn-success');
         nextBtn.classList.add('btn-primary');
@@ -407,11 +413,18 @@ function loadQuestion(index) {
     submitBtn.classList.remove('btn-primary'); // Ensure not blue by default
     submitBtn.classList.add('btn-danger'); // Default red
 
-    if (isLastQuestion && !examSubmitted && !isPracticeMode) {
+    if (isLastQuestion && !examSubmitted) {
         nextBtn.textContent = '已是最后一题';
         baseSubmitText = "提 交 答 卷"; // Change base text for submit prompt
-        submitBtn.classList.remove('btn-danger');
-        submitBtn.classList.add('btn-primary'); // Make it blue
+        
+        // 在练习模式下，把"交卷"按钮改为醒目的颜色，提示用户完成练习
+        if (isPracticeMode) {
+            submitBtn.classList.remove('btn-danger');
+            submitBtn.classList.add('btn-primary'); // 蓝色更醒目
+        } else {
+            submitBtn.classList.remove('btn-danger');
+            submitBtn.classList.add('btn-primary'); // Make it blue
+        }
     }
     // Always update the button text including timer if running
     updateSubmitButtonText(baseSubmitText);
@@ -516,8 +529,6 @@ function handleOptionSelect(inputElement, questionIndex) {
 
     // 更新答题卡显示
     updateAnswerCardUI();
-
-    // 练习模式下不再直接显示反馈，而是等待用户点击"确认答案"按钮
 }
 
 /**
@@ -572,26 +583,16 @@ function nextQuestion() {
             if (checkAnswerInPracticeMode()) {
                 questionAnswerChecked = true;
 
-                // 更新按钮文本
+                // 更新按钮文本，非最后一题时变为下一题
                 const isLastQuestion = currentQuestionIndex === sortedQuestions.length - 1;
-                if (isLastQuestion) {
-                    nextBtn.textContent = '完成练习';
-                } else {
+                if (!isLastQuestion) {
                     nextBtn.textContent = '下一题 >';
                 }
             }
         } else {
-            // 第二次点击：跳转到下一题或完成
+            // 第二次点击：跳转到下一题
             questionAnswerChecked = false;
-
-            const isLastQuestion = currentQuestionIndex === sortedQuestions.length - 1;
-            if (isLastQuestion) {
-                // 如果是最后一题，回到第一题
-                loadQuestion(0);
-            } else {
-                // 否则进入下一题
-                loadQuestion(currentQuestionIndex + 1);
-            }
+            loadQuestion(currentQuestionIndex + 1);
         }
     } else {
         // 考试模式正常行为
@@ -669,7 +670,10 @@ function displayResults(results) { /*...(logic unchanged)...*/
      incorrectQuestionsListEl.innerHTML = ''; const incorrectFeedback = results.feedback.filter(item => !item.correct);
      if (incorrectFeedback.length > 0) { const listHeader = document.createElement('h5'); listHeader.textContent = '错误题目列表:'; incorrectQuestionsListEl.appendChild(listHeader); incorrectFeedback.forEach(item => { const div = document.createElement('div'); div.textContent = `第 ${item.index + 1} 题`; div.onclick = () => { goToQuestion(item.index); }; incorrectQuestionsListEl.appendChild(div); }); }
      else { incorrectQuestionsListEl.innerHTML = '<p style="color: var(--success-color); text-align: center; margin-top: 10px;">✔ 恭喜您，全部回答正确！</p>'; }
+     
+     // 确保重新开始按钮显示
      restartBtn.style.display = 'block';
+     restartBtn.textContent = '再来一次';
 }
 /** Provides visual feedback on the options for the CURRENT question */
  function showFeedbackOnOptions() { /*...(logic unchanged)...*/
@@ -691,6 +695,12 @@ function submitExam(isAutoSubmit = false) {
     if (examSubmitted) return;
 
     if (timerInterval) clearInterval(timerInterval);
+
+    // 练习模式下，不显示确认弹窗，直接开始新的练习
+    if (isPracticeMode) {
+        restartExam();
+        return;
+    }
 
     if (!isAutoSubmit) {
         const unanswered = userAnswers.filter(a => a === null || (Array.isArray(a) && a.length === 0)).length;
@@ -761,6 +771,8 @@ function restartExam() {
     examSubmitted = false;
     examStarted = false; // Reset started flag
     examResults = null;
+    currentQuestionIndex = 0; // 确保从第一题开始
+    userAnswers = []; // 清空用户答案
     if (timerInterval) clearInterval(timerInterval); // Clear timer
 
     // --- Reset UI Elements ---
@@ -769,6 +781,12 @@ function restartExam() {
     restartBtn.style.display = 'none';
     //console.log("恢复答题卡和设置卡片显示");
 
+    // 确保答题卡和设置卡片显示，结果卡片隐藏
+    const answerCardEl = document.getElementById('answer-card');
+    scoreCardEl.style.display = 'none';
+    answerCardEl.style.display = 'block';
+    settingsCardEl.style.display = 'block';
+
     // Make sure settings inputs are enabled
     setSettingsInputsDisabled(false);
 
@@ -776,6 +794,11 @@ function restartExam() {
     // This implicitly resets state variables like sortedQuestions, userAnswers, timeLeft, etc.
     // and updates the UI (loads question 0, builds card, sets initial submit button text)
     generateExamQuestions();
+
+    // 如果是练习模式，保持练习模式状态
+    if (isPracticeMode) {
+        examContainerEl.classList.add('practice-mode');
+    }
 
     // Note: Timer is NOT started here. It waits for the first handleOptionSelect call.
 }
