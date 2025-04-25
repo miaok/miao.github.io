@@ -252,53 +252,123 @@ body {
 }
 /* --- Styles for Settings Card --- */
 .settings-card {
-    order: -1;
+    order: -1; /* Make settings card appear before answer card */
 }
 .settings-body {
-    padding: 12px 15px; /* Slightly adjusted padding */
+    padding: 15px;
     display: flex;
-    flex-direction: column; /* Keeps button/note below the items */
-    gap: 2px; /* Increased gap between the item container and button */
+    flex-direction: column;
+    gap: 10px;
 }
-/* 在settings-card相关样式附近添加 */
 .settings-card .settings-row {
     display: flex;
-    flex-wrap: nowrap;
-    justify-content: space-around;
+    flex-wrap: wrap;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 5px;
+    width: 100%;
+    gap: 8px;
 }
-
 .settings-card .setting-item {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 5px;
     flex: 1;
-    min-width: 0;
 }
-
 .settings-card .setting-item label {
-    white-space: nowrap;
+    width: 40px; /* Fixed width for alignment */
     font-size: 0.9em;
-    flex-shrink: 0;
+    font-weight: 500;
+    color: var(--dark-color);
 }
-
-/* 修改settings-card相关样式 */
 .settings-card .setting-item input {
-    width: 20px; /* 缩小宽度 */
-    padding: 4px 6px; /* 调整内边距 */
-    font-size: 0.9em;
-    flex-grow: 1;
-    border: 1px solid #ced4da; /* 更浅的边框颜色 */
-    border-radius: 4px; /* 圆角 */
-    transition: border-color 0.15s ease-in-out;
+    width: 100%;
+    max-width: 60px;
+    padding: 5px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.95em;
+    text-align: center;
+    transition: border-color 0.2s;
 }
-
 .settings-card .setting-item input:focus {
-    border-color: #86b7fe; /* 聚焦时更浅的蓝色 */
-    outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1); /* 更柔和的阴影 */
+    border-color: var(--primary-color);
+    outline: none;
+}
+/* 练习模式切换开关样式 */
+.mode-selector {
+    margin-top: 5px;
+    justify-content: flex-start;
+    align-items: center;
+}
+.mode-label {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--dark-color);
+    margin-right: 10px;
+}
+.toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 24px;
+    margin-right: 10px;
+}
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.toggle-switch label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+.toggle-switch label:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+.toggle-switch input:checked + label {
+    background-color: var(--success-color);
+}
+.toggle-switch input:checked + label:before {
+    transform: translateX(26px);
+}
+.practice-mode-desc {
+    font-size: 0.8em;
+    color: var(--secondary-color);
+}
+/* 练习模式下的反馈样式 */
+.option-feedback {
+    display: none;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    padding: 3px 6px;
+    border-radius: 3px;
+}
+.practice-mode .option-feedback {
+    display: inline-block;
+}
+.feedback-correct {
+    color: var(--success-color);
+}
+.feedback-incorrect {
+    color: var(--danger-color);
 }
 .timer-display {
     font-size: 1.8em;
