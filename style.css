@@ -438,6 +438,17 @@ body {
 .exam-container.review-mode .answer-grid-btn.current {
     box-shadow: 0 0 8px rgba(0, 123, 255, 0.8);
 }
+
+/* Hide answer card and settings card when exam is submitted */
+.exam-container.submitted .answer-card,
+.exam-container.submitted .settings-card {
+    display: none !important;
+}
+
+/* Ensure score card is always visible when exam is submitted */
+.exam-container.submitted .score-card {
+    display: block !important;
+}
 /* --- Answer Card Pagination --- */
 .answer-pagination {
     display: flex;
@@ -477,6 +488,7 @@ body {
 .score-card {
     order: 1;
     animation: fadeIn 0.5s ease;
+    display: none; /* 默认隐藏，只在提交后显示 */
 }
 .score-display {
     padding: 20px;
@@ -485,9 +497,9 @@ body {
     font-weight: bold;
 }
 .regenerate-btn {
-    width: 50%; 
-    padding: 4px 10px; 
-    margin: 4px auto 0; 
+    width: 50%;
+    padding: 4px 10px;
+    margin: 4px auto 0;
     display: block;
 }
 #incorrect-questions-list {
@@ -720,11 +732,11 @@ body {
     .modal-content {
         width: 95%;
     }
-    
+
     .modal-footer {
         flex-direction: column;
     }
-    
+
     .modal-footer .btn {
         width: 100%;
     }
